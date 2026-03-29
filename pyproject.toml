@@ -4,20 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mudipu"
-version = "0.1.0"
+version = "1.0.0"
 description = "Developer-facing instrumentation SDK for LLM applications"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
-    {name = "Mudipu Team", email = "team@mudipu.dev"}
+    {name = "Santhosh Nayak", email = "santhoshnayak0903@gmail.com"}
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
     "pydantic>=2.0.0",
@@ -44,10 +47,20 @@ anthropic = [
 platform = [
     "mudipu-packages>=0.1.0",
 ]
+health = [
+    "sentence-transformers>=2.2.0",
+    "matplotlib>=3.5.0",
+    "scikit-learn>=1.0.0",
+    "numpy>=1.21.0",
+]
 all = [
     "openai>=1.0.0",
     "anthropic>=0.18.0",
     "mudipu-packages>=0.1.0",
+    "sentence-transformers>=2.2.0",
+    "matplotlib>=3.5.0",
+    "scikit-learn>=1.0.0",
+    "numpy>=1.21.0",
 ]
 
 [project.scripts]

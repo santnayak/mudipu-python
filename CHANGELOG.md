@@ -8,28 +8,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial SDK structure with decorators, tracers, and context management
-- Local exporters (JSON, HTML, Platform)
-- Analyzer with HTML report generation
-- CLI tools for analyzing traces
-- OpenAI integration example
-- Configuration management with YAML support
-- Utility modules for IDs, JSON handling, redaction, time, and YAML
+- TBD
 
 ### Changed
-- N/A
-
-### Deprecated
-- N/A
-
-### Removed
-- N/A
+- TBD
 
 ### Fixed
-- N/A
+- TBD
 
-### Security
-- N/A
+## [1.0.0] - 2026-03-29
+
+### Added
+- **Health Metrics System**: Complete context health analysis with 12 metrics (relevance, duplicates, saturation, loops, novelty, growth rate, drift, progress, effectiveness)
+- **CLI Enhancements**: Progress spinners and real-time status updates during analysis
+- **CLI Help Text**: Comprehensive help text and examples for all commands
+- **Health Command**: New `mudipu health` command with visualization support, custom goals, and configurable thresholds
+- **Progress Callbacks**: Real-time progress feedback throughout health analysis pipeline
+- **Comprehensive Documentation**:
+  - Getting Started Guide (300+ lines)
+  - Health Metrics Documentation (300+ lines with formulas and interpretations)
+  - API Reference (complete API documentation)
+  - Configuration Guide (all config methods and options)
+  - CLI Reference (all commands with examples)
+  - Contributing Guide (simplified, friendly)
+- **Comprehensive Test Suite**:
+  - Health analyzer tests (400+ lines, 30+ test methods)
+  - CLI tests (all commands)
+  - Decorator tests (session, LLM, tool tracing)
+  - Model tests (Pydantic validation and serialization)
+  - Configuration tests (YAML, env vars, defaults)
+- **OSS Release Checklist**: Complete preparation guide with 100+ checklist items
+- **Market-Ready README**: Professional README with badges, quick start, and feature highlights
+- **Visualization**: Health metrics visualization with matplotlib charts
+
+### Changed
+- **CLI Interface**: Enhanced all command help text with detailed examples
+- **Model Loading**: Suppressed warnings during sentence-transformer model loading for cleaner output
+- **Health Analysis**: Configurable threshold parameter (default 0.5) for health scoring
+- **Documentation Structure**: Moved to production-ready documentation format
+
+### Fixed
+- **User Experience**: Added progress indicators to prevent perceived hangs during long operations
+- **CLI Usability**: Improved help text clarity and accessibility for all commands
+
+### Performance
+- **Embeddings Caching**: Optional caching for faster repeated health analysis
 
 ## [0.1.0] - 2026-03-20
 
