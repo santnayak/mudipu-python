@@ -3,7 +3,7 @@ Analyzer for trace sessions.
 
 Provides insights and statistics about LLM usage.
 """
-from typing import Optional, Any
+from typing import Optional, Any, Callable
 from pathlib import Path
 from collections import defaultdict
 
@@ -148,6 +148,94 @@ class TraceAnalyzer:
         
         costs["total"] = total_cost
         return costs
+    
+    def get_health_metrics(
+        self,
+        goal: Optional[str] = None,
+        include_viz: bool = False,
+        output_dir: Optional[Path] = None,
+        progress_callback: Optional[Callable[[str], None]] = None
+    ) -> dict[str, Any]:
+        """
+        Analyze context health metrics for the session.
+        
+        Args:
+            goal: User's goal/objective (for relevance scoring)
+            include_viz: Generate visualization chart
+            output_dir: Directory for visualization output
+            progress_callback: Optional callback for progress updates
+        
+        Returns:
+            Dictionary with 'per_turn' and 'session' health metrics
+        
+        Raises:
+            ImportError: If health dependencies not installed
+        """
+        try:
+            from mudipu.analyzer.health import ContextHealthAnalyzer
+        except ImportError:
+            raise ImportError(
+                "Health metrics require additional dependencies. "
+                "Install with: pip install mudipu[health]"
+            )
+        
+        # Run health analysis
+        analyzer = ContextHealthAnalyzer(
+            self.session,
+            goal=goal,
+            progress_callback=progress_callback
+        )
+        analysis = analyzer.get_full_analysis()
+        
+        # Generate visualization if requested
+        viz_path = None
+        if include_viz:
+            if progress_callback:
+                progress_callback("Generating visualization...")
+            try:
+                from mudipu.analyzer.visualizer import HealthVisualizer
+                visualizer = HealthVisualizer()
+                viz_path = visualizer.create_health_report(
+                    self.session,
+                    analysis,
+                    output_dir=output_dir
+                )
+            except ImportError:
+                raise ImportError(
+                    "Visualization requires matplotlib. "
+                    "Install with: pip install mudipu[health]"
+                )
+        
+        # Convert to dictionary
+        result = {
+            "per_turn": [
+                {
+                    "turn_number": m.turn_number,
+                    "health_score": m.health_score,
+                    "relevance_score": m.relevance_score,
+                    "duplicate_ratio": m.duplicate_ratio,
+                    "saturation_score": m.saturation_score,
+                    "tool_loop_score": m.tool_loop_score,
+                    "novelty_score": m.novelty_score,
+                    "details": m.details,
+                }
+                for m in analysis.per_turn
+            ],
+            "session": {
+                "overall_health": analysis.session.overall_health,
+                "context_growth_rate": analysis.session.context_growth_rate,
+                "drift_score": analysis.session.drift_score,
+                "loop_score": analysis.session.loop_score,
+                "progress_score": analysis.session.progress_score,
+                "effectiveness_score": analysis.session.effectiveness_score,
+                "details": analysis.session.details,
+            },
+        }
+        
+        if viz_path:
+            result["visualization_path"] = str(viz_path)
+        
+        return result
     
     def find_slow_turns(self, threshold_ms: float = 1000.0) -> list[Turn]:
         """
