@@ -262,4 +262,4 @@ Try:
 ### Need help?
 
 - [FAQ](./faq.md)
-- [GitHub Issues](https://github.com/yourusername/mudipu-python/issues)
+- [GitHub Issues](https://github.com/santnayak/mudipu-python/issues)

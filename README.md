@@ -152,8 +152,8 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 - **Documentation**: [./docs/](./docs/)
 - **PyPI**: https://pypi.org/project/mudipu/
-- **GitHub**: https://github.com/yourusername/mudipu-python
-- **Issues**: https://github.com/yourusername/mudipu-python/issues
+- **GitHub**: https://github.com/santnayak/mudipu-python
+- **Issues**: https://github.com/santnayak/mudipu-python/issues
 
 ## ⭐ Acknowledgments
 
