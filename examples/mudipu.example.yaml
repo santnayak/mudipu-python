@@ -1,0 +1,204 @@
+# Mudipu Configuration Example
+# ===========================
+# This file shows all available configuration options for Mudipu.
+# Copy this file to your project root as `mudipu.yaml` and customize as needed.
+
+# Storage Configuration
+# ---------------------
+# Controls where and how trace files are stored
+storage:
+  # Directory where trace files will be saved
+  # Can be absolute or relative path
+  directory: "./mudipu-traces"
+  
+  # Serialization format for trace files
+  # Options: "json", "pickle", "msgpack"
+  # - json: Human-readable, widely compatible (recommended)
+  # - pickle: Python-specific, preserves all types
+  # - msgpack: Compact binary format
+  format: "json"
+  
+  # Enable gzip compression for trace files
+  # Reduces file size but adds processing overhead
+  compression: false
+  
+  # Automatically delete old trace files
+  # Helps manage disk space in long-running applications
+  auto_cleanup: false
+  
+  # Number of days to keep traces (only used if auto_cleanup is true)
+  cleanup_days: 30
+
+
+# Tracing Configuration
+# ---------------------
+# Controls tracing behavior and data collection
+tracing:
+  # Master switch for tracing functionality
+  # Set to false to disable all tracing
+  enabled: true
+  
+  # Automatically save sessions when complete
+  # If false, you must manually save sessions
+  auto_flush: true
+  
+  # Include source code snippets in traces
+  # Warning: May expose sensitive code
+  include_source: false
+  
+  # Fraction of sessions to trace (0.0 to 1.0)
+  # Useful for sampling in high-volume production environments
+  # 1.0 = trace all sessions, 0.1 = trace 10% of sessions
+  sample_rate: 1.0
+  
+  # Include function arguments in traces
+  # Warning: May log sensitive data
+  include_arguments: true
+  
+  # Maximum depth for nested function tracing
+  # Prevents excessive overhead from deep call stacks
+  max_depth: 10
+
+
+# Health Analysis Configuration
+# ------------------------------
+# Controls context health metrics computation (requires mudipu[health])
+health:
+  # Sentence transformer model for semantic embeddings
+  # Options:
+  #   - "all-MiniLM-L6-v2": Fast, good quality (default)
+  #   - "all-mpnet-base-v2": Higher quality, slower
+  #   - "paraphrase-multilingual-MiniLM-L12-v2": Multilingual support
+  model_name: "all-MiniLM-L6-v2"
+  
+  # Similarity threshold for detecting duplicate/similar content
+  # Range: 0.0 to 1.0 (higher = more strict)
+  similarity_threshold: 0.7
+  
+  # Number of previous turns to consider for context analysis
+  # Larger values improve loop detection but slow analysis
+  history_limit: 5
+  
+  # Cache embeddings for faster repeated analysis
+  # Recommended for development, may use more memory
+  cache_embeddings: true
+  
+  # Default health score threshold for warnings
+  # Scores below this will be flagged as unhealthy
+  default_threshold: 0.5
+
+
+# Logging Configuration
+# ---------------------
+# Controls logging output and verbosity
+logging:
+  # Logging level
+  # Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+  level: "INFO"
+  
+  # Path to log file (optional)
+  # If not set, logs go to stdout only
+  file: null
+  
+  # Log format string
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Include timestamps in logs
+  include_timestamp: true
+
+
+# Export Configuration
+# --------------------
+# Controls default export behavior
+export:
+  # Include metadata in exports
+  include_metadata: true
+  
+  # Include system information in exports
+  include_system_info: true
+  
+  # Default HTML export theme
+  # Options: "light", "dark", "auto"
+  html_theme: "light"
+  
+  # Pretty-print JSON exports
+  json_indent: 2
+
+
+# Performance Configuration
+# --------------------------
+# Tuning options for performance
+performance:
+  # Enable async processing for traces
+  # Can improve performance in high-throughput scenarios
+  async_processing: false
+  
+  # Maximum queue size for async processing
+  max_queue_size: 1000
+  
+  # Timeout for individual trace operations (seconds)
+  operation_timeout: 30
+
+
+# Development Configuration
+# --------------------------
+# Options useful during development
+development:
+  # Enable debug mode (more verbose output)
+  debug: false
+  
+  # Raise exceptions instead of logging them
+  # Useful for catching errors during development
+  strict_mode: false
+  
+  # Enable performance profiling
+  profile: false
+  
+  # Validate all data with Pydantic models
+  # Slower but catches data issues early
+  validate_data: true
+
+
+# Environment-Specific Overrides
+# -------------------------------
+# These sections show how to configure for different environments
+# Uncomment the section you want to use
+
+# Production Configuration
+# production:
+#   tracing:
+#     sample_rate: 0.1  # Only trace 10% of sessions
+#     include_source: false
+#     include_arguments: false
+#   storage:
+#     format: "msgpack"  # More compact
+#     compression: true
+#     auto_cleanup: true
+#     cleanup_days: 7
+#   logging:
+#     level: "WARNING"
+#   performance:
+#     async_processing: true
+
+# Development Configuration
+# development:
+#   tracing:
+#     sample_rate: 1.0  # Trace everything
+#     include_source: true
+#   storage:
+#     format: "json"  # Human-readable
+#     compression: false
+#   logging:
+#     level: "DEBUG"
+#   development:
+#     debug: true
+#     strict_mode: true
+
+# Testing Configuration
+# testing:
+#   tracing:
+#     auto_flush: false  # Manual control
+#   storage:
+#     directory: "/tmp/mudipu-tests"
+#   logging:
+#     level: "ERROR"  # Quiet during tests
