@@ -24,15 +24,23 @@ def temp_trace_file():
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         # Create minimal valid session
         session_data = {
-            "session_id": "test-123",
-            "trace_id": "trace-123",
+            "session_id": "550e8400-e29b-41d4-a716-446655440001",
+            "trace_id": "550e8400-e29b-41d4-a716-446655440002",
             "name": "test-session",
+            "created_at": "2026-03-30T10:00:00",
+            "ended_at": "2026-03-30T10:01:00",
+            "tags": [],
+            "metadata": {"user_input": "Hello"},
             "turns": [
                 {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
                     "turn_number": 1,
+                    "timestamp": "2026-03-30T10:00:30",
                     "request_messages": [{"role": "user", "content": "Hello"}],
                     "response_message": {"role": "assistant", "content": "Hi there"},
+                    "request_tools": [],
                     "tool_calls_detected": [],
+                    "has_tool_calls": False,
                     "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
                     "duration_ms": 500,
                     "model": "gpt-4",
@@ -41,7 +49,6 @@ def temp_trace_file():
             "turn_count": 1,
             "total_tokens": 15,
             "total_duration_ms": 500,
-            "metadata": {"user_input": "Hello"},
         }
         json.dump(session_data, f)
         return Path(f.name)
@@ -83,7 +90,7 @@ class TestStatsCommand:
         # Should execute without error
         assert result.exit_code == 0
         # Should show session info
-        assert "test-session" in result.output or "test-123" in result.output
+        assert "test-session" in result.output or "550e8400" in result.output
 
 
 class TestAnalyzeCommand:
