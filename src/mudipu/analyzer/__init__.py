@@ -1,4 +1,5 @@
 """Analyzer module for trace analysis."""
+
 from mudipu.analyzer.analyzer import TraceAnalyzer
 from mudipu.analyzer.summary import SummaryGenerator
 
@@ -11,7 +12,7 @@ try:
         HealthAnalysis,
     )
     from mudipu.analyzer.visualizer import HealthVisualizer
-    
+
     __all__ = [
         "TraceAnalyzer",
         "SummaryGenerator",

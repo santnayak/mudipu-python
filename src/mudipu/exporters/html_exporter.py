@@ -1,6 +1,7 @@
 """
 HTML exporter for trace data with interactive visualization.
 """
+
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -15,26 +16,26 @@ class HTMLExporter:
     """
     Export trace sessions to HTML format with visualization.
     """
-    
+
     def __init__(self, output_dir: Optional[Path] = None):
         """
         Initialize HTML exporter.
-        
+
         Args:
             output_dir: Directory to write HTML files (defaults to config trace_dir)
         """
         config = get_config()
         self.output_dir = output_dir or config.trace_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     def export(self, session: Session, filename: Optional[str] = None) -> Path:
         """
         Export a session to HTML file.
-        
+
         Args:
             session: Session to export
             filename: Optional custom filename
-            
+
         Returns:
             Path to the exported file
         """
@@ -42,22 +43,22 @@ class HTMLExporter:
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
             session_name = session.name or "session"
             filename = f"{session_name}_{timestamp}_{session.session_id}.html"
-        
+
         output_path = self.output_dir / filename
-        
+
         # Render HTML
         html_content = self._render_html(session)
-        
+
         # Write to file
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
-        
+
         return output_path
-    
+
     def _render_html(self, session: Session) -> str:
         """Render session to HTML."""
         template = Template(HTML_TEMPLATE)
-        
+
         return template.render(
             session=session,
             sdk_version=__version__,

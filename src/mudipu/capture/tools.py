@@ -1,6 +1,7 @@
 """
 Capture tool/function executions.
 """
+
 from typing import Optional, Any
 from datetime import datetime
 
@@ -16,14 +17,14 @@ def capture_tool_execution(
 ) -> dict:
     """
     Capture a tool execution event.
-    
+
     Args:
         tool_name: Name of the tool/function
         arguments: Arguments passed to the tool
         result: Tool execution result
         error: Error message if tool failed
         duration_ms: Execution duration
-        
+
     Returns:
         Tool execution record
     """
@@ -38,10 +39,10 @@ def capture_tool_execution(
         "trace_id": str(trace_context.trace_id) if trace_context.trace_id else None,
         "turn_number": trace_context.turn_number,
     }
-    
+
     # Store in tool execution storage
     _store_tool_execution(execution_record)
-    
+
     return execution_record
 
 
@@ -54,10 +55,10 @@ def _store_tool_execution(record: dict) -> None:
     session_id = record.get("session_id")
     if not session_id:
         return
-    
+
     if session_id not in _tool_executions:
         _tool_executions[session_id] = []
-    
+
     _tool_executions[session_id].append(record)
 
 

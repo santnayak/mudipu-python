@@ -1,6 +1,7 @@
 """
 ID generation utilities.
 """
+
 import uuid
 from typing import Optional
 
@@ -23,7 +24,7 @@ def generate_turn_id() -> uuid.UUID:
 def generate_tool_call_id() -> str:
     """
     Generate a tool call ID in OpenAI format.
-    
+
     Returns:
         Tool call ID string (e.g., 'call_abc123...')
     """
@@ -33,14 +34,14 @@ def generate_tool_call_id() -> str:
 def short_id(id_value: Optional[uuid.UUID] = None) -> str:
     """
     Generate or shorten a UUID to first 8 characters.
-    
+
     Args:
         id_value: Optional UUID to shorten
-        
+
     Returns:
         Short ID string
     """
     if id_value is None:
         id_value = uuid.uuid4()
-    
+
     return str(id_value)[:8]

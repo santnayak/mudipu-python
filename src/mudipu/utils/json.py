@@ -1,6 +1,7 @@
 """
 JSON utilities for safe serialization.
 """
+
 import json
 from typing import Any
 from datetime import datetime
@@ -12,7 +13,7 @@ class MudipuJSONEncoder(json.JSONEncoder):
     """
     Custom JSON encoder that handles common Python types.
     """
-    
+
     def default(self, obj: Any) -> Any:
         """Handle non-serializable objects."""
         if isinstance(obj, datetime):
@@ -29,18 +30,18 @@ class MudipuJSONEncoder(json.JSONEncoder):
             return obj.dict()
         elif hasattr(obj, "__dict__"):
             return obj.__dict__
-        
+
         return super().default(obj)
 
 
 def safe_dumps(obj: Any, indent: int = 2) -> str:
     """
     Safely serialize object to JSON string.
-    
+
     Args:
         obj: Object to serialize
         indent: Indentation level
-        
+
     Returns:
         JSON string
     """
@@ -50,10 +51,10 @@ def safe_dumps(obj: Any, indent: int = 2) -> str:
 def safe_loads(json_str: str) -> Any:
     """
     Safely deserialize JSON string.
-    
+
     Args:
         json_str: JSON string to deserialize
-        
+
     Returns:
         Deserialized object
     """
@@ -63,7 +64,7 @@ def safe_loads(json_str: str) -> Any:
 def pretty_print(obj: Any) -> None:
     """
     Pretty print an object as JSON.
-    
+
     Args:
         obj: Object to print
     """

@@ -1,7 +1,8 @@
 """
 Capture and record LLM turn data.
 """
-from typing import Optional, Any
+
+from typing import Optional
 from uuid import uuid4
 
 from mudipu.context import trace_context
@@ -17,30 +18,30 @@ def capture_llm_turn(
 ) -> Optional[Turn]:
     """
     Capture a complete LLM turn.
-    
+
     Args:
         request_messages: Input messages
         response_data: Response from LLM
         model: Model identifier
         tools: Available tools
         duration_ms: Duration of the call
-        
+
     Returns:
         Captured Turn instance, or None if no active session
     """
     # Check if we have an active session
     if not trace_context.is_active():
         return None
-    
+
     # Extract response message
     response_message = _extract_response_message(response_data)
-    
+
     # Extract tool calls if present
     tool_calls = _extract_tool_calls(response_data)
-    
+
     # Extract usage
     usage = response_data.get("usage")
-    
+
     # Create turn
     turn = Turn(
         id=uuid4(),
@@ -55,12 +56,12 @@ def capture_llm_turn(
         tool_calls_detected=tool_calls,
         has_tool_calls=bool(tool_calls),
     )
-    
+
     # Record turn using the global tracer
     # We'll need to access the active tracer instance
     # For now, we'll store turns in a session-scoped storage
     _store_turn(turn)
-    
+
     return turn
 
 
@@ -69,7 +70,7 @@ def _extract_response_message(response_data: dict) -> dict:
     # If response_data already looks like a message
     if "role" in response_data:
         return response_data
-    
+
     # Default assistant message
     return {
         "role": "assistant",
@@ -80,7 +81,7 @@ def _extract_response_message(response_data: dict) -> dict:
 def _extract_tool_calls(response_data: dict) -> list[ToolCall]:
     """Extract tool calls from response data."""
     tool_calls: list[ToolCall] = []
-    
+
     if "tool_calls" in response_data:
         for tc in response_data["tool_calls"]:
             tool_call = ToolCall(
@@ -90,13 +91,14 @@ def _extract_tool_calls(response_data: dict) -> list[ToolCall]:
                 function_arguments=tc.get("function", {}).get("arguments"),
             )
             tool_calls.append(tool_call)
-    
+
     return tool_calls
 
 
 def _get_timestamp() -> str:
     """Get current timestamp in ISO format."""
     from datetime import datetime
+
     return datetime.utcnow().isoformat()
 
 
@@ -109,10 +111,10 @@ _turn_storage: dict[str, list[Turn]] = {}
 def _store_turn(turn: Turn) -> None:
     """Store a turn in session-scoped storage."""
     session_id = str(trace_context.session_id)
-    
+
     if session_id not in _turn_storage:
         _turn_storage[session_id] = []
-    
+
     _turn_storage[session_id].append(turn)
 
 
