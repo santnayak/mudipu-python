@@ -117,6 +117,13 @@ def _store_turn(turn: Turn) -> None:
 
     _turn_storage[session_id].append(turn)
 
+    # Also add to the global session if available
+    from mudipu.tracer import get_current_session
+
+    session = get_current_session()
+    if session:
+        session.add_turn(turn)
+
 
 def get_stored_turns(session_id: str) -> list[Turn]:
     """Retrieve stored turns for a session."""

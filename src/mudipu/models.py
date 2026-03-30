@@ -17,17 +17,20 @@ except ImportError:
     class ToolCall(BaseModel):
         """Represents a tool/function call from the LLM."""
 
-        id: str
+        id: str = Field(default_factory=lambda: str(uuid4()))
         type: str = "function"
         function_name: Optional[str] = None
         function_arguments: Optional[str] = None
+        name: Optional[str] = None  # Alias for function_name
+        arguments: Optional[dict] = None  # Alternative to function_arguments
+        result: Optional[str] = None
 
     class BaseTurn(BaseModel):
         """Represents a single turn in a conversation trace."""
 
-        id: UUID
+        id: UUID = Field(default_factory=uuid4)
         turn_number: int
-        timestamp: str
+        timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
         request_messages: list[dict] = Field(default_factory=list)
         request_tools: list[dict] = Field(default_factory=list)
         model: Optional[str] = None
@@ -93,3 +96,27 @@ class ExportMetadata(BaseModel):
     sdk_version: str
     format_version: str = "1.0"
     exporter_type: str  # "json", "html", "platform"
+
+
+class Message(BaseModel):
+    """Represents a chat message."""
+
+    role: str
+    content: str
+    name: Optional[str] = None
+
+
+class Usage(BaseModel):
+    """Token usage information."""
+
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+    estimated_cost: Optional[float] = None
+
+
+class CompleteTurn(BaseTurn):
+    """Extended Turn with additional analysis fields."""
+
+    embeddings: Optional[list[float]] = None
+    metadata: dict[str, Any] = Field(default_factory=dict)

@@ -5,7 +5,8 @@ Provides thread-local storage for the current session and turn information.
 """
 
 import contextvars
-from typing import Optional
+from contextlib import contextmanager
+from typing import Optional, Any
 from uuid import UUID
 
 # Context variables for thread-safe tracing
@@ -74,3 +75,34 @@ class TraceContext:
 
 # Global context instance
 trace_context = TraceContext()
+
+
+@contextmanager
+def session_context(name: Optional[str] = None, tags: Optional[list[str]] = None, **kwargs: Any) -> Any:
+    """
+    Context manager for creating a tracing session.
+
+    Args:
+        name: Optional session name
+        tags: Optional session tags
+        **kwargs: Additional session parameters
+
+    Yields:
+        Created Session instance
+
+    Example:
+        with session_context(name="my-session") as session:
+            # Your LLM calls here
+            pass
+    """
+    # Avoid circular import
+    from mudipu.tracer import MudipuTracer
+
+    tracer = MudipuTracer(session_name=name, tags=tags or [])
+
+    try:
+        session = tracer.start_session()
+        yield session
+    finally:
+        tracer.end_session()
+        # Session remains accessible via get_current_session() until clear_context() is called

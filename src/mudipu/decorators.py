@@ -105,12 +105,13 @@ def trace_llm(
     return decorator
 
 
-def trace_tool(tool_name: Optional[str] = None) -> Callable:
+def trace_tool(tool_name: Optional[str] = None, name: Optional[str] = None) -> Callable:
     """
     Decorator for tracing tool/function calls.
 
     Args:
         tool_name: Name of the tool (defaults to function name)
+        name: Alias for tool_name for convenience
 
     Example:
         @trace_tool("web_search")
@@ -127,7 +128,7 @@ def trace_tool(tool_name: Optional[str] = None) -> Callable:
             if not config.enabled or not trace_context.is_active():
                 return func(*args, **kwargs)
 
-            actual_tool_name = tool_name or func.__name__
+            actual_tool_name = tool_name or name or func.__name__
 
             # Time the call
             start_time = time.time()
@@ -169,13 +170,16 @@ def trace_tool(tool_name: Optional[str] = None) -> Callable:
     return decorator
 
 
-def trace_session(name: Optional[str] = None, tags: Optional[list[str]] = None) -> Callable:
+def trace_session(
+    name: Optional[str] = None, tags: Optional[list[str]] = None, metadata: Optional[dict[str, Any]] = None
+) -> Callable:
     """
     Decorator for automatic session management.
 
     Args:
         name: Session name
         tags: Session tags
+        metadata: Additional metadata for the session
 
     Example:
         @trace_session(name="chatbot", tags=["production"])
@@ -198,6 +202,9 @@ def trace_session(name: Optional[str] = None, tags: Optional[list[str]] = None) 
             tracer = MudipuTracer(session_name=name, tags=tags)
 
             with tracer.trace_session():
+                # Add metadata if provided
+                if metadata and tracer.session:
+                    tracer.session.metadata.update(metadata)
                 return func(*args, **kwargs)
 
         return wrapper

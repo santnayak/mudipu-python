@@ -47,6 +47,9 @@ class MudipuTracer:
         trace_context.trace_id = self.session.trace_id
         trace_context.turn_number = 0
 
+        # Set global session
+        _set_current_session(self.session)
+
         return self.session
 
     def end_session(self) -> Optional[Session]:
@@ -65,11 +68,14 @@ class MudipuTracer:
         if self.config.auto_export:
             self._auto_export()
 
-        # Reset context
+        # Reset context but keep global session for querying
         trace_context.reset()
 
         completed_session = self.session
         self.session = None
+
+        # Note: We don't clear _current_session here so it can be queried after completion
+        # Use clear_context() to explicitly clear it
 
         return completed_session
 
@@ -172,3 +178,30 @@ class MudipuTracer:
     def is_active(self) -> bool:
         """Check if tracer has an active session."""
         return self.session is not None
+
+
+# Global session storage for decorator support
+_current_session: Optional[Session] = None
+
+
+def get_current_session() -> Optional[Session]:
+    """
+    Get the current active session.
+
+    Returns:
+        Current Session instance or None if no session is active
+    """
+    return _current_session
+
+
+def clear_context() -> None:
+    """Clear the current session and tracing context."""
+    global _current_session
+    _current_session = None
+    trace_context.reset()
+
+
+def _set_current_session(session: Optional[Session]) -> None:
+    """Internal helper to set the current session."""
+    global _current_session
+    _current_session = session
