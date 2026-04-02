@@ -56,7 +56,6 @@ health = [
 all = [
     "openai>=1.0.0",
     "anthropic>=0.18.0",
-    "mudipu-packages>=0.1.0",
     "sentence-transformers>=2.2.0",
     "matplotlib>=3.5.0",
     "scikit-learn>=1.0.0",
