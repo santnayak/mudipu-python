@@ -8,13 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- TBD
+- **GitHub Actions publish workflow**: Automated PyPI publishing via OIDC Trusted Publishing on version tag push (`v*.*.*`) or manual trigger
+- **Platform extra (`mudipu[platform]`)**: `mudipu-packages` dependency now correctly scoped to the `platform` extra only; removed from `all` extra to prevent resolution failures for users without private registry access
 
 ### Changed
-- TBD
-
-### Fixed
-- TBD
+- **`PlatformExporter`**: Removed NATS transport from the SDK layer. The exporter now POSTs `TraceEvent` JSON payloads to the Mudipu platform gateway HTTP endpoint (`/ingest/turn`). The gateway owns NATS routing internally, keeping the SDK dependency-free of NATS
+- **`mudipu[all]` extra**: No longer includes `mudipu-packages` — install `mudipu[platform]` explicitly when platform export is needed
 
 ## [1.0.0] - 2026-03-29
 
