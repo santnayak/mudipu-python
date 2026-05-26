@@ -1,6 +1,6 @@
 # Contributing to Mudipu 🎉
 
-Hey there! Thanks for wanting to contribute to Mudipu. We're excited to have you here!
+Hey there! Thanks for wanting to contribute to Mudipu. I am excited to have you here!
 
 ## Code of Conduct
 
