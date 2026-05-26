@@ -441,7 +441,7 @@ class ContextHealthAnalyzer:
                 model = LinearRegression().fit(X, y)
                 return float(model.coef_[0])
             except Exception:
-                pass
+                pass  # Fall through to simple slope below
 
         # Fallback: simple slope
         return (token_counts[-1] - token_counts[0]) / (len(token_counts) - 1)
