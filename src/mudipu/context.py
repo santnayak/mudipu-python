@@ -3,8 +3,10 @@ Context management for tracing.
 
 Provides thread-local storage for the current session and turn information.
 """
+
 import contextvars
-from typing import Optional
+from contextlib import contextmanager
+from typing import Optional, Any
 from uuid import UUID
 
 # Context variables for thread-safe tracing
@@ -17,41 +19,41 @@ class TraceContext:
     """
     Context manager for tracing information.
     """
-    
+
     @property
     def session_id(self) -> Optional[UUID]:
         """Get current session ID from context."""
         return _session_id.get()
-    
+
     @session_id.setter
     def session_id(self, value: Optional[UUID]) -> None:
         """Set session ID in context."""
         _session_id.set(value)
-    
+
     @property
     def trace_id(self) -> Optional[UUID]:
         """Get current trace ID from context."""
         return _trace_id.get()
-    
+
     @trace_id.setter
     def trace_id(self, value: Optional[UUID]) -> None:
         """Set trace ID in context."""
         _trace_id.set(value)
-    
+
     @property
     def turn_number(self) -> int:
         """Get current turn number from context."""
         return _turn_number.get()
-    
+
     @turn_number.setter
     def turn_number(self, value: int) -> None:
         """Set turn number in context."""
         _turn_number.set(value)
-    
+
     def increment_turn(self) -> int:
         """
         Increment turn number and return new value.
-        
+
         Returns:
             New turn number
         """
@@ -59,13 +61,13 @@ class TraceContext:
         new_turn = current + 1
         self.turn_number = new_turn
         return new_turn
-    
+
     def reset(self) -> None:
         """Reset all context variables."""
         self.session_id = None
         self.trace_id = None
         self.turn_number = 0
-    
+
     def is_active(self) -> bool:
         """Check if tracing context is active."""
         return self.session_id is not None
@@ -73,3 +75,34 @@ class TraceContext:
 
 # Global context instance
 trace_context = TraceContext()
+
+
+@contextmanager
+def session_context(name: Optional[str] = None, tags: Optional[list[str]] = None, **kwargs: Any) -> Any:
+    """
+    Context manager for creating a tracing session.
+
+    Args:
+        name: Optional session name
+        tags: Optional session tags
+        **kwargs: Additional session parameters
+
+    Yields:
+        Created Session instance
+
+    Example:
+        with session_context(name="my-session") as session:
+            # Your LLM calls here
+            pass
+    """
+    # Avoid circular import
+    from mudipu.tracer import MudipuTracer
+
+    tracer = MudipuTracer(session_name=name, tags=tags or [])
+
+    try:
+        session = tracer.start_session()
+        yield session
+    finally:
+        tracer.end_session()
+        # Session remains accessible via get_current_session() until clear_context() is called

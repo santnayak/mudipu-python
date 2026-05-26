@@ -54,7 +54,10 @@ mudipu_traces/
 # Logs
 *.log
 
+.ruff*
+
 
 #unrelease
 unreleased/
 scripts/
+.pypirc

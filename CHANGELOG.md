@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`PlatformExporter`**: Removed NATS transport from the SDK layer. The exporter now POSTs `TraceEvent` JSON payloads to the Mudipu platform gateway HTTP endpoint (`/ingest/turn`). The gateway owns NATS routing internally, keeping the SDK dependency-free of NATS
 - **`mudipu[all]` extra**: No longer includes `mudipu-packages` — install `mudipu[platform]` explicitly when platform export is needed
 
+## [1.1.0] - 2026-05-26
+
+### Added
+- **HTML Report Redesign**: Dark-theme master-detail layout matching the mudipu-web dashboard — branded header with red-glow logo + `mudipu.dev` link, summary bar, 240px turn sidebar, and Conversation / Execution / Health tabs per turn
+- **Health in HTML Export**: `HTMLExporter.export()` accepts optional `health_metrics` dict; renders session and per-turn health scores, progress bars, and color-coded badges inline
+- **CLI**: `mudipu health --visualize` now also generates an HTML report with embedded health metrics
+
+### Changed
+- HTML reports are dark-mode only; `HTMLExporter.export()` and `_render_html()` gain a backwards-compatible `health_metrics` parameter
+
 ## [1.0.0] - 2026-03-29
 
 ### Added

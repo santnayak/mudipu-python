@@ -3,7 +3,7 @@
 > **Instrument, analyze, and optimize your AI agents**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![PyPI version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://pypi.org/project/mudipu/)
+[![PyPI version](https://img.shields.io/badge/pypi-v1.1.0-blue.svg)](https://pypi.org/project/mudipu/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Mudipu is a lightweight Python SDK for tracing, analyzing, and improving LLM-powered applications. Add instrumentation in minutes, detect inefficiencies, and measure context health—all without sending data to external services.
@@ -150,6 +150,7 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ## 🔗 Links
 
+- **Website**: [mudipu.dev](https://mudipu.dev)
 - **Documentation**: [./docs/](./docs/)
 - **PyPI**: https://pypi.org/project/mudipu/
 - **GitHub**: https://github.com/santnayak/mudipu-python
