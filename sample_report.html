@@ -1,90 +1,9 @@
-"""
-HTML exporter for trace data with interactive visualization.
-"""
-
-from pathlib import Path
-from datetime import datetime
-from typing import Optional
-from jinja2 import Template
-
-from mudipu.models import Session
-from mudipu.config import get_config
-from mudipu.version import __version__
-
-
-class HTMLExporter:
-    """
-    Export trace sessions to HTML format with visualization.
-    """
-
-    def __init__(self, output_dir: Optional[Path] = None):
-        """
-        Initialize HTML exporter.
-
-        Args:
-            output_dir: Directory to write HTML files (defaults to config trace_dir)
-        """
-        config = get_config()
-        self.output_dir = output_dir or config.trace_dir
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-
-    def export(
-        self,
-        session: Session,
-        filename: Optional[str] = None,
-        health_metrics: Optional[dict] = None,
-    ) -> Path:
-        """
-        Export a session to HTML file.
-
-        Args:
-            session: Session to export
-            filename: Optional custom filename
-            health_metrics: Optional health metrics dict from TraceAnalyzer.get_health_metrics()
-
-        Returns:
-            Path to the exported file
-        """
-        if filename is None:
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-            session_name = session.name or "session"
-            filename = f"{session_name}_{timestamp}_{session.session_id}.html"
-
-        output_path = self.output_dir / filename
-
-        html_content = self._render_html(session, health_metrics=health_metrics)
-
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(html_content)
-
-        return output_path
-
-    def _render_html(self, session: Session, health_metrics: Optional[dict] = None) -> str:
-        """Render session to HTML."""
-        template = Template(HTML_TEMPLATE)
-
-        # Build per-turn health lookup dict indexed by turn_number
-        turn_health: dict = {}
-        if health_metrics and "per_turn" in health_metrics:
-            for tm in health_metrics["per_turn"]:
-                turn_health[tm["turn_number"]] = tm
-
-        return template.render(
-            session=session,
-            sdk_version=__version__,
-            export_time=datetime.utcnow().isoformat(),
-            health_metrics=health_metrics,
-            turn_health=turn_health,
-        )
-
-
-# HTML Template — mudipu dark theme, master-detail layout
-HTML_TEMPLATE = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ session.name or 'Trace' }} — mudipu</title>
+  <title>Gateway Demo — mudipu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -600,12 +519,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <div class="header-center">
-    <span class="session-name">{{ session.name or 'Trace Session' }}</span>
-    <span class="session-id">{{ session.session_id }}</span>
+    <span class="session-name">Gateway Demo</span>
+    <span class="session-id">009c9270-bd6b-4c35-984c-00c906c06541</span>
   </div>
 
   <div class="header-right">
-    <span>{{ export_time[:19] }} UTC</span>
+    <span>2026-05-26T20:53:33 UTC</span>
     <a href="https://mudipu.dev" target="_blank" rel="noopener">View in Platform →</a>
   </div>
 </header>
@@ -616,42 +535,40 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="metric-icon">⏱</div>
     <div>
       <div class="metric-label">Duration</div>
-      <div class="metric-value">{{ "%.0f"|format(session.total_duration_ms) }} ms</div>
+      <div class="metric-value">2708 ms</div>
     </div>
   </div>
   <div class="metric-tile">
     <div class="metric-icon">◈</div>
     <div>
       <div class="metric-label">Total Tokens</div>
-      <div class="metric-value">{{ session.total_tokens }}</div>
+      <div class="metric-value">1104</div>
     </div>
   </div>
   <div class="metric-tile">
     <div class="metric-icon">↺</div>
     <div>
       <div class="metric-label">Turns</div>
-      <div class="metric-value">{{ session.turn_count }}</div>
+      <div class="metric-value">3</div>
     </div>
   </div>
   <div class="metric-tile">
     <div class="metric-icon">⬡</div>
     <div>
       <div class="metric-label">Model</div>
-      <div class="metric-value" style="font-size:11px;">{{ (session.turns[0].model or '—') if session.turns else '—' }}</div>
+      <div class="metric-value" style="font-size:11px;">openai/gpt-4o-mini</div>
     </div>
   </div>
   <div class="metric-tile">
     <div class="metric-icon">❤</div>
     <div>
       <div class="metric-label">Health</div>
-      {% if health_metrics %}
-      {% set oh = health_metrics.session.overall_health %}
-      <div class="metric-value" style="color: {% if oh >= 0.7 %}#4ADE80{% elif oh >= 0.4 %}#FDE047{% else %}#F87171{% endif %};">
-        {{ "%.2f"|format(oh) }}
+      
+      
+      <div class="metric-value" style="color: #4ADE80;">
+        0.79
       </div>
-      {% else %}
-      <div class="metric-value" style="color: var(--muted);">—</div>
-      {% endif %}
+      
     </div>
   </div>
 </div>
@@ -661,196 +578,612 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   <!-- ── Sidebar ─────────────────────────────────────────────────── -->
   <aside class="sidebar">
-    <div class="sidebar-header">Turns · {{ session.turn_count }}</div>
+    <div class="sidebar-header">Turns · 3</div>
 
     <nav class="turns-nav" id="turnsNav">
-      {% for turn in session.turns %}
-      <div class="turn-nav-row {% if loop.first %}active{% endif %}"
-           onclick="selectTurn({{ turn.turn_number }})">
-        <div class="turn-pill">{{ turn.turn_number }}</div>
+      
+      <div class="turn-nav-row active"
+           onclick="selectTurn(1)">
+        <div class="turn-pill">1</div>
         <div class="turn-nav-info">
-          <div class="turn-nav-model">{{ (turn.model or 'unknown')[:20] }}</div>
-          <div class="turn-nav-dur">{{ "%.0f"|format(turn.duration_ms or 0) }} ms</div>
+          <div class="turn-nav-model">openai/gpt-4o-mini</div>
+          <div class="turn-nav-dur">812 ms</div>
         </div>
-        <div class="turn-nav-icon">{{ '🔧' if turn.has_tool_calls else '💬' }}</div>
+        <div class="turn-nav-icon">🔧</div>
       </div>
-      {% endfor %}
+      
+      <div class="turn-nav-row "
+           onclick="selectTurn(2)">
+        <div class="turn-pill">2</div>
+        <div class="turn-nav-info">
+          <div class="turn-nav-model">openai/gpt-4o-mini</div>
+          <div class="turn-nav-dur">1242 ms</div>
+        </div>
+        <div class="turn-nav-icon">💬</div>
+      </div>
+      
+      <div class="turn-nav-row "
+           onclick="selectTurn(3)">
+        <div class="turn-pill">3</div>
+        <div class="turn-nav-info">
+          <div class="turn-nav-model">openai/gpt-4o-mini</div>
+          <div class="turn-nav-dur">654 ms</div>
+        </div>
+        <div class="turn-nav-icon">💬</div>
+      </div>
+      
     </nav>
 
-    {% if health_metrics %}
-    {% set sm = health_metrics.session %}
+    
+    
     <div class="health-overview">
       <div class="health-overview-title">Session Health</div>
-      {% set hrows = [
-        ('Progress',   sm.progress_score),
-        ('Effective',  sm.effectiveness_score),
-        ('Anti-Drift', 1 - sm.drift_score),
-        ('Anti-Loop',  1 - sm.loop_score)
-      ] %}
-      {% for label, val in hrows %}
-      {% set pct = (val * 100)|round|int %}
+      
+      
+      
       <div class="health-row">
-        <div class="health-row-label">{{ label }}</div>
+        <div class="health-row-label">Progress</div>
         <div class="progress-track">
-          <div class="progress-fill" style="width:{{ pct }}%; background:{% if pct >= 70 %}#22C55E{% elif pct >= 40 %}#EAB308{% else %}#EF4444{% endif %};"></div>
+          <div class="progress-fill" style="width:82%; background:#22C55E;"></div>
         </div>
-        <div class="health-row-val">{{ "%.2f"|format(val) }}</div>
+        <div class="health-row-val">0.82</div>
       </div>
-      {% endfor %}
+      
+      
+      <div class="health-row">
+        <div class="health-row-label">Effective</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:79%; background:#22C55E;"></div>
+        </div>
+        <div class="health-row-val">0.79</div>
+      </div>
+      
+      
+      <div class="health-row">
+        <div class="health-row-label">Anti-Drift</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:89%; background:#22C55E;"></div>
+        </div>
+        <div class="health-row-val">0.89</div>
+      </div>
+      
+      
+      <div class="health-row">
+        <div class="health-row-label">Anti-Loop</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:94%; background:#22C55E;"></div>
+        </div>
+        <div class="health-row-val">0.94</div>
+      </div>
+      
     </div>
-    {% endif %}
+    
   </aside>
 
   <!-- ── Right panel ─────────────────────────────────────────────── -->
   <main class="panel">
-    {% for turn in session.turns %}
-    {% set turn_h = turn_health.get(turn.turn_number) %}
-    <div class="turn-detail {% if loop.first %}active{% endif %}" id="turn-detail-{{ turn.turn_number }}">
+    
+    
+    <div class="turn-detail active" id="turn-detail-1">
 
       <!-- Turn header -->
       <div class="turn-detail-header">
-        <span class="turn-title">Turn {{ turn.turn_number }} of {{ session.turn_count }}</span>
-        {% if turn.model %}
-        <span class="badge badge-model">{{ turn.model }}</span>
-        {% endif %}
-        {% if turn.duration_ms %}
-        <span class="badge badge-dur">{{ "%.0f"|format(turn.duration_ms) }} ms</span>
-        {% endif %}
-        {% if turn.usage %}
-        <span class="badge badge-tokens">{{ turn.usage.get('total_tokens', 0) }} tokens</span>
-        {% endif %}
-        {% if turn_h %}
-        {% set hs = turn_h.health_score %}
-        <span class="badge {% if hs >= 0.7 %}badge-h-good{% elif hs >= 0.4 %}badge-h-mid{% else %}badge-h-bad{% endif %}">
-          ❤ {{ "%.2f"|format(hs) }}
+        <span class="turn-title">Turn 1 of 3</span>
+        
+        <span class="badge badge-model">openai/gpt-4o-mini</span>
+        
+        
+        <span class="badge badge-dur">812 ms</span>
+        
+        
+        <span class="badge badge-tokens">180 tokens</span>
+        
+        
+        
+        <span class="badge badge-h-good">
+          ❤ 0.87
         </span>
-        {% endif %}
-        {% if session.tags %}
-        <div>{% for tag in session.tags %}<span class="tag">{{ tag }}</span>{% endfor %}</div>
-        {% endif %}
+        
+        
+        <div><span class="tag">demo</span><span class="tag">openrouter</span><span class="tag">tools</span></div>
+        
       </div>
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(this, 'conv-{{ turn.turn_number }}')">Conversation</button>
-        <button class="tab-btn" onclick="switchTab(this, 'exec-{{ turn.turn_number }}')">Execution</button>
-        <button class="tab-btn" onclick="switchTab(this, 'health-{{ turn.turn_number }}')">Health</button>
+        <button class="tab-btn active" onclick="switchTab(this, 'conv-1')">Conversation</button>
+        <button class="tab-btn" onclick="switchTab(this, 'exec-1')">Execution</button>
+        <button class="tab-btn" onclick="switchTab(this, 'health-1')">Health</button>
       </div>
 
       <!-- Conversation tab -->
-      <div class="tab-panel active" id="conv-{{ turn.turn_number }}">
-        {% for msg in turn.request_messages %}
-        {% set role = msg.role if msg.role in ['user','assistant','system','tool'] else 'user' %}
-        <div class="message {{ role }}">
-          <div class="message-role">{{ msg.role or 'user' }}</div>
-          <div class="message-content">{{ msg.content or '' }}</div>
+      <div class="tab-panel active" id="conv-1">
+        
+        
+        <div class="message system">
+          <div class="message-role">system</div>
+          <div class="message-content">You are a helpful assistant with access to tools.</div>
         </div>
-        {% endfor %}
+        
+        
+        <div class="message user">
+          <div class="message-role">user</div>
+          <div class="message-content">What is the weather in London and Paris right now?</div>
+        </div>
+        
 
-        {% if turn.response_message %}
+        
         <div class="message assistant">
-          <div class="message-role">{{ turn.response_message.role or 'assistant' }}</div>
-          <div class="message-content">{{ turn.response_message.content or '' }}</div>
+          <div class="message-role">assistant</div>
+          <div class="message-content"></div>
         </div>
-        {% endif %}
+        
 
-        {% if turn.tool_calls_detected %}
+        
         <div class="tool-calls-block">
           <div class="tool-calls-title">🔧 Tool Calls</div>
-          {% for tc in turn.tool_calls_detected %}
+          
           <div class="tool-call-item">
-            <div class="tool-call-name">{{ tc.function_name or tc.name or 'unknown' }}</div>
-            <pre class="tool-call-args">{{ tc.function_arguments or '' }}</pre>
+            <div class="tool-call-name">get_weather</div>
+            <pre class="tool-call-args">{"city": "London"}</pre>
           </div>
-          {% endfor %}
+          
+          <div class="tool-call-item">
+            <div class="tool-call-name">get_weather</div>
+            <pre class="tool-call-args">{"city": "Paris"}</pre>
+          </div>
+          
         </div>
-        {% endif %}
+        
       </div>
 
       <!-- Execution tab -->
-      <div class="tab-panel" id="exec-{{ turn.turn_number }}">
-        {% if turn.usage %}
+      <div class="tab-panel" id="exec-1">
+        
         <div class="token-grid">
           <div class="token-card">
             <div class="token-card-label">Prompt Tokens</div>
-            <div class="token-card-value prompt">{{ turn.usage.get('prompt_tokens', 0) }}</div>
+            <div class="token-card-value prompt">142</div>
           </div>
           <div class="token-card">
             <div class="token-card-label">Completion Tokens</div>
-            <div class="token-card-value completion">{{ turn.usage.get('completion_tokens', 0) }}</div>
+            <div class="token-card-value completion">38</div>
           </div>
           <div class="token-card">
             <div class="token-card-label">Total Tokens</div>
-            <div class="token-card-value total">{{ turn.usage.get('total_tokens', 0) }}</div>
+            <div class="token-card-value total">180</div>
           </div>
         </div>
-        {% endif %}
+        
         <div class="exec-field">
           <div class="exec-field-label">Duration</div>
-          <div class="exec-field-value">{{ "%.2f"|format(turn.duration_ms or 0) }} ms</div>
+          <div class="exec-field-value">812.30 ms</div>
         </div>
         <div class="exec-field">
           <div class="exec-field-label">Model</div>
-          <div class="exec-field-value">{{ turn.model or '—' }}</div>
+          <div class="exec-field-value">openai/gpt-4o-mini</div>
         </div>
         <div class="exec-field">
           <div class="exec-field-label">Timestamp</div>
-          <div class="exec-field-value">{{ turn.timestamp[:19] if turn.timestamp else '—' }}</div>
+          <div class="exec-field-value">2026-05-26T20:53:33</div>
         </div>
         <div class="exec-field">
           <div class="exec-field-label">Tool Calls</div>
-          <div class="exec-field-value">{{ 'Yes' if turn.has_tool_calls else 'No' }}</div>
+          <div class="exec-field-value">Yes</div>
         </div>
       </div>
 
       <!-- Health tab -->
-      <div class="tab-panel" id="health-{{ turn.turn_number }}">
-        {% if turn_h %}
-        {% set hm = [
-          ('Relevance',       turn_h.relevance_score),
-          ('Novelty',         turn_h.novelty_score),
-          ('Health Score',    turn_h.health_score),
-          ('Non-Duplicate',   1 - turn_h.duplicate_ratio),
-          ('Non-Tool-Loop',   1 - turn_h.tool_loop_score)
-        ] %}
-        {% for label, val in hm %}
-        {% set pct = (val * 100)|round|int %}
+      <div class="tab-panel" id="health-1">
+        
+        
+        
+        
         <div class="health-metric">
           <div class="health-metric-header">
-            <span class="health-metric-label">{{ label }}</span>
-            <span class="health-metric-value" style="color:{% if pct >= 70 %}#4ADE80{% elif pct >= 40 %}#FDE047{% else %}#F87171{% endif %};">{{ "%.3f"|format(val) }}</span>
+            <span class="health-metric-label">Relevance</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.910</span>
           </div>
           <div class="progress-track-lg">
-            <div class="progress-fill" style="width:{{ pct }}%; background:{% if pct >= 70 %}#22C55E{% elif pct >= 40 %}#EAB308{% else %}#EF4444{% endif %};"></div>
+            <div class="progress-fill" style="width:91%; background:#22C55E;"></div>
           </div>
         </div>
-        {% endfor %}
-        {% else %}
-        <div class="callout">
-          No health data available for this turn.<br>
-          Run <code>mudipu health &lt;trace.json&gt;</code> to analyse context health.
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Novelty</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.880</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:88%; background:#22C55E;"></div>
+          </div>
         </div>
-        {% endif %}
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Health Score</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.870</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:87%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Duplicate</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.950</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:95%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Tool-Loop</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.920</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:92%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
       </div>
 
     </div>
-    {% endfor %}
+    
+    
+    <div class="turn-detail " id="turn-detail-2">
 
-    {% if not session.turns %}
-    <div class="callout">No turns recorded in this session.</div>
-    {% endif %}
+      <!-- Turn header -->
+      <div class="turn-detail-header">
+        <span class="turn-title">Turn 2 of 3</span>
+        
+        <span class="badge badge-model">openai/gpt-4o-mini</span>
+        
+        
+        <span class="badge badge-dur">1242 ms</span>
+        
+        
+        <span class="badge badge-tokens">375 tokens</span>
+        
+        
+        
+        <span class="badge badge-h-good">
+          ❤ 0.79
+        </span>
+        
+        
+        <div><span class="tag">demo</span><span class="tag">openrouter</span><span class="tag">tools</span></div>
+        
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this, 'conv-2')">Conversation</button>
+        <button class="tab-btn" onclick="switchTab(this, 'exec-2')">Execution</button>
+        <button class="tab-btn" onclick="switchTab(this, 'health-2')">Health</button>
+      </div>
+
+      <!-- Conversation tab -->
+      <div class="tab-panel active" id="conv-2">
+        
+        
+        <div class="message system">
+          <div class="message-role">system</div>
+          <div class="message-content">You are a helpful assistant with access to tools.</div>
+        </div>
+        
+        
+        <div class="message user">
+          <div class="message-role">user</div>
+          <div class="message-content">What is the weather in London and Paris right now?</div>
+        </div>
+        
+        
+        <div class="message tool">
+          <div class="message-role">tool</div>
+          <div class="message-content">London: 14°C, Overcast. Humidity 78%. Wind 12 km/h SW.</div>
+        </div>
+        
+        
+        <div class="message tool">
+          <div class="message-role">tool</div>
+          <div class="message-content">Paris: 18°C, Partly cloudy. Humidity 62%. Wind 8 km/h NW.</div>
+        </div>
+        
+
+        
+        <div class="message assistant">
+          <div class="message-role">assistant</div>
+          <div class="message-content">Here is the current weather:
+
+**London**: 14°C, overcast with 78% humidity and a 12 km/h south-westerly breeze.
+
+**Paris**: 18°C, partly cloudy with 62% humidity and a lighter 8 km/h north-westerly wind.
+
+Paris is warmer and less humid right now if you are deciding between the two!</div>
+        </div>
+        
+
+        
+      </div>
+
+      <!-- Execution tab -->
+      <div class="tab-panel" id="exec-2">
+        
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-card-label">Prompt Tokens</div>
+            <div class="token-card-value prompt">284</div>
+          </div>
+          <div class="token-card">
+            <div class="token-card-label">Completion Tokens</div>
+            <div class="token-card-value completion">91</div>
+          </div>
+          <div class="token-card">
+            <div class="token-card-label">Total Tokens</div>
+            <div class="token-card-value total">375</div>
+          </div>
+        </div>
+        
+        <div class="exec-field">
+          <div class="exec-field-label">Duration</div>
+          <div class="exec-field-value">1241.70 ms</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Model</div>
+          <div class="exec-field-value">openai/gpt-4o-mini</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Timestamp</div>
+          <div class="exec-field-value">2026-05-26T20:53:33</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Tool Calls</div>
+          <div class="exec-field-value">No</div>
+        </div>
+      </div>
+
+      <!-- Health tab -->
+      <div class="tab-panel" id="health-2">
+        
+        
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Relevance</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.850</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:85%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Novelty</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.760</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:76%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Health Score</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.790</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:79%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Duplicate</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.820</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:82%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Tool-Loop</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.960</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:96%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+      </div>
+
+    </div>
+    
+    
+    <div class="turn-detail " id="turn-detail-3">
+
+      <!-- Turn header -->
+      <div class="turn-detail-header">
+        <span class="turn-title">Turn 3 of 3</span>
+        
+        <span class="badge badge-model">openai/gpt-4o-mini</span>
+        
+        
+        <span class="badge badge-dur">654 ms</span>
+        
+        
+        <span class="badge badge-tokens">549 tokens</span>
+        
+        
+        
+        <span class="badge badge-h-good">
+          ❤ 0.71
+        </span>
+        
+        
+        <div><span class="tag">demo</span><span class="tag">openrouter</span><span class="tag">tools</span></div>
+        
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this, 'conv-3')">Conversation</button>
+        <button class="tab-btn" onclick="switchTab(this, 'exec-3')">Execution</button>
+        <button class="tab-btn" onclick="switchTab(this, 'health-3')">Health</button>
+      </div>
+
+      <!-- Conversation tab -->
+      <div class="tab-panel active" id="conv-3">
+        
+        
+        <div class="message user">
+          <div class="message-role">user</div>
+          <div class="message-content">Which city would you recommend for a weekend trip?</div>
+        </div>
+        
+
+        
+        <div class="message assistant">
+          <div class="message-role">assistant</div>
+          <div class="message-content">Based on the weather, I would recommend **Paris** for a weekend trip. The milder temperature of 18°C and partly cloudy skies make it ideal for outdoor sightseeing — strolling along the Seine, visiting the Louvre, or sitting at a café in Montmartre. London at 14°C with overcast skies is still pleasant but might require an extra layer!</div>
+        </div>
+        
+
+        
+      </div>
+
+      <!-- Execution tab -->
+      <div class="tab-panel" id="exec-3">
+        
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-card-label">Prompt Tokens</div>
+            <div class="token-card-value prompt">471</div>
+          </div>
+          <div class="token-card">
+            <div class="token-card-label">Completion Tokens</div>
+            <div class="token-card-value completion">78</div>
+          </div>
+          <div class="token-card">
+            <div class="token-card-label">Total Tokens</div>
+            <div class="token-card-value total">549</div>
+          </div>
+        </div>
+        
+        <div class="exec-field">
+          <div class="exec-field-label">Duration</div>
+          <div class="exec-field-value">654.10 ms</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Model</div>
+          <div class="exec-field-value">openai/gpt-4o-mini</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Timestamp</div>
+          <div class="exec-field-value">2026-05-26T20:53:33</div>
+        </div>
+        <div class="exec-field">
+          <div class="exec-field-label">Tool Calls</div>
+          <div class="exec-field-value">No</div>
+        </div>
+      </div>
+
+      <!-- Health tab -->
+      <div class="tab-panel" id="health-3">
+        
+        
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Relevance</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.780</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:78%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Novelty</span>
+            <span class="health-metric-value" style="color:#FDE047;">0.610</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:61%; background:#EAB308;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Health Score</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.710</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:71%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Duplicate</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.780</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:78%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+        <div class="health-metric">
+          <div class="health-metric-header">
+            <span class="health-metric-label">Non-Tool-Loop</span>
+            <span class="health-metric-value" style="color:#4ADE80;">0.970</span>
+          </div>
+          <div class="progress-track-lg">
+            <div class="progress-fill" style="width:97%; background:#22C55E;"></div>
+          </div>
+        </div>
+        
+        
+      </div>
+
+    </div>
+    
+
+    
   </main>
 </div>
 
 <!-- ── Footer ─────────────────────────────────────────────────────── -->
 <footer>
   <span class="footer-dot"></span>
-  Generated by <strong>mudipu</strong> SDK v{{ sdk_version }} &middot;
+  Generated by <strong>mudipu</strong> SDK v1.1.0 &middot;
   <a href="https://mudipu.dev" target="_blank" rel="noopener">mudipu.dev</a>
 </footer>
 
 <script>
-  var _turnNumbers = [{% for turn in session.turns %}{{ turn.turn_number }}{% if not loop.last %},{% endif %}{% endfor %}];
+  var _turnNumbers = [1,2,3];
 
   function selectTurn(n) {
     document.querySelectorAll('.turn-detail').forEach(function(el) {
@@ -881,5 +1214,3 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 </body>
 </html>
-"""
-

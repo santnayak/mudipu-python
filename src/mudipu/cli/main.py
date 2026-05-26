@@ -345,6 +345,12 @@ def health(
                 json.dump(metrics, f, indent=2)
             console.print(f"[green]✓[/green] Metrics saved to {save_json}")
 
+        # Generate HTML report with embedded health metrics
+        if visualize:
+            html_exporter = HTMLExporter(output_dir=output_dir)
+            html_path = html_exporter.export(session, health_metrics=metrics)
+            console.print(f"[green]✓[/green] HTML report with health metrics saved to {html_path}")
+
         # Display warnings/insights from session details
         if session_metrics.get("details"):
             insights = []
