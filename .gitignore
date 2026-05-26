@@ -60,3 +60,4 @@ mudipu_traces/
 #unrelease
 unreleased/
 scripts/
+.pypirc
